@@ -9,13 +9,53 @@ import {
 import { addFlight } from './flight'
 import * as constant from './constant'
 
+
+// Функция для перезапуска игры
+const resetGame = (engine) => {
+  // Получаем сохраненные значения
+  const successCount = engine.getVariable(constant.successCount, 0)
+  const failedCount = engine.getVariable(constant.failedCount, 0)
+  const gameScore = engine.getVariable(constant.gameScore, 0)
+  const modal = document.getElementById('modal');
+
+  modal.style.display = 'none';
+
+  // engine.setVariable(constant.blockCount, 0)
+  // engine.setVariable(constant.initialAngle, 0)
+  engine.setVariable(constant.gameStartNow, true)
+
+  // Восстанавливаем состояния
+  engine.setVariable(constant.successCount, successCount)
+  engine.setVariable(constant.failedCount, failedCount)
+  engine.setVariable(constant.gameScore, gameScore)
+
+  // Запускаем анимацию
+  startAnimate(engine)
+}
+
+
+
+
 export const endAnimate = (engine) => {
   const gameStartNow = engine.getVariable(constant.gameStartNow)
   if (!gameStartNow) return
   const successCount = engine.getVariable(constant.successCount, 0)
-  const failedCount = engine.getVariable(constant.failedCount)
+  let failedCount = engine.getVariable(constant.failedCount)
   const gameScore = engine.getVariable(constant.gameScore, 0)
-  const threeFiguresOffset = Number(successCount) > 99 ? engine.width * 0.1 : 0
+  const threeFiguresOffset = Number(successCount) > 99 ? engine.width * 0.1 : 0;
+
+  const inviteButton = document.querySelector('.js-invite');
+
+  let restartCount = 0;
+
+  inviteButton.addEventListener('click', function() {
+    if (restartCount < 1){
+      resetGame(engine);
+      restartCount++;
+    } else {
+      inviteButton.style.display = "none";
+    }
+  });
 
   drawYellowString(engine, {
     string: 'Этаж',
