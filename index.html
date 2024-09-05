@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
-    <title>Tower Building</title>
+    <title>Строитель Башен</title>
     <link rel="icon" type="image/x-icon" href="./assets/favicon.png">
     <style>*{margin:0;padding:0}
     img{width:100%}
@@ -94,9 +94,16 @@
     </div><div class="wxShare hide">
     <img src="./assets/main-share-icon.png">
 </div></div>
+<script src="/sdk.js"></script>
 <script src="./dist/main.js"></script>
 <script src="./assets/zepto-1.1.6.min.js"></script>
 <script>
+    YaGames
+        .init()
+        .then(ysdk => {
+            console.log('Yandex SDK initialized');
+            window.ysdk = ysdk;
+        });
     var domReady, loadFinish, canvasReady, loadError, gameStart, game, score, successCount
   // init window height and width
   var gameWidth = window.innerWidth
