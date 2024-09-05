@@ -2,10 +2,10 @@
   "name": "tower_game",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
-    "start": "npm run build && node index.js",
-    "build": "webpack --mode production --module-bind js=babel-loader"
+    "start": "npm run build && node main.js",
+    "build": "webpack --mode production"
   },
   "repository": {
     "type": "git",
