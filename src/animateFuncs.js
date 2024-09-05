@@ -12,9 +12,10 @@ import * as constant from './constant'
 
 // Функция для перезапуска игры
 const resetGame = (engine) => {
+
   // Получаем сохраненные значения
   const successCount = engine.getVariable(constant.successCount, 0)
-  const failedCount = engine.getVariable(constant.failedCount, 0)
+  // const failedCount = engine.getVariable(constant.failedCount, 0)
   const gameScore = engine.getVariable(constant.gameScore, 0)
   const modal = document.getElementById('modal');
 
@@ -23,10 +24,11 @@ const resetGame = (engine) => {
   // engine.setVariable(constant.blockCount, 0)
   // engine.setVariable(constant.initialAngle, 0)
   engine.setVariable(constant.gameStartNow, true)
+  engine.setVariable(constant.failedCount, 1)
 
   // Восстанавливаем состояния
   engine.setVariable(constant.successCount, successCount)
-  engine.setVariable(constant.failedCount, failedCount)
+  // engine.setVariable(constant.failedCount, failedCount)
   engine.setVariable(constant.gameScore, gameScore)
 
   // Запускаем анимацию
