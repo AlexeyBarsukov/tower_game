@@ -10,9 +10,98 @@ import { addFlight } from './flight'
 import * as constant from './constant'
 
 
-// Функция для перезапуска игры
-const resetGame = (engine) => {
 
+
+const resetGame = (engine) => {
+  if(typeof YaGames == 'undefined'){
+    startGameAfterAd(engine);
+    return
+  }
+  YaGames.init().then(ysdk => {
+    console.log('Yandex SDK initialized');
+    window.ysdk = ysdk;
+    ysdk.adv.showRewardedVideo({
+      callbacks: {
+        onOpen: () => {
+          console.log('Video ad open. reward is:');
+        },
+        onRewarded: () => {
+          console.log('Rewarded!');
+          startGameAfterAd(engine);
+        },
+        onClose: () => {
+          console.log('Video ad closed.');
+          startGameAfterAd(engine); // Если досмотрел, продолжаем игру
+        },
+        onError: (e) => {
+          console.log('Error while open video ad:', e);
+        }
+      }
+    })
+  });
+}
+
+const stopingGameReadyApi = () => {
+
+  if(typeof YaGames === 'undefined'){
+    return;
+  }
+
+  YaGames.init().then(ysdk => {
+    console.log('Вызываю функция для остановки GameApi')
+    window.ysdk = ysdk;
+    if(ysdk.features.GameplayAPI){
+      ysdk.features.GameplayAPI.stop();
+      // Вызов метода для работы с таблицей лидеров
+      //   ysdk.getLeaderboards()
+      //       .then(lb => {
+      //         return lb.setLeaderboardScore('leaderBoards', maxScore); // Установка очков
+      //       })
+      //       .then(() => {
+      //         console.log('Score successfully submitted');
+      //       })
+      //       .catch(err => {
+      //         console.error('Error submitting score:', err);
+      //       });
+      // }).catch(err => {
+      //   console.error('Error initializing Yandex SDK:', err);
+      // });
+    }else {
+      console.log('Невозможно остановить GameplayAPI')
+    }
+  })
+
+
+}
+
+// Создаем наблюдателя для отслеживания изменений в DOM
+const observer = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+      const element = document.getElementById('over-zero');
+      const element2 = document.getElementById('startGame')
+      if (element) {
+        const style = window.getComputedStyle(element);
+        if (style.display === 'block') {
+          console.log('СТОП ИГРА!');
+          stopingGameReadyApi()
+        }
+      }
+      if (element2) {
+        const style = window.getComputedStyle(element2);
+        if (style.display === 'block') {
+          console.log('СТОП ЕЩЕ НЕ НАЧАЛИ!');
+          stopingGameReadyApi()
+        }
+      }
+    }
+  });
+});
+
+// Наблюдаем за изменениями в документе
+observer.observe(document.body, { attributes: true, subtree: true });
+
+const startGameAfterAd = (engine) => {
   // Получаем сохраненные значения
   const successCount = engine.getVariable(constant.successCount, 0)
   // const failedCount = engine.getVariable(constant.failedCount, 0)
@@ -39,8 +128,12 @@ const resetGame = (engine) => {
 
 
 export const endAnimate = (engine) => {
+
   const gameStartNow = engine.getVariable(constant.gameStartNow)
-  if (!gameStartNow) return
+  if (!gameStartNow) {
+    return
+  }
+
   const successCount = engine.getVariable(constant.successCount, 0)
   let failedCount = engine.getVariable(constant.failedCount)
   const gameScore = engine.getVariable(constant.gameScore, 0)
@@ -116,9 +209,12 @@ export const endAnimate = (engine) => {
   }
 }
 
+
+
 export const startAnimate = (engine) => {
   const gameStartNow = engine.getVariable(constant.gameStartNow)
-  if (!gameStartNow) return
+  if (!gameStartNow) return;
+
   const lastBlock = engine.getInstance(`block_${engine.getVariable(constant.blockCount)}`)
   if (!lastBlock || [constant.land, constant.out].indexOf(lastBlock.status) > -1) {
     if (checkMoveDown(engine) && getMoveDownValue(engine)) return
@@ -165,4 +261,6 @@ export const startAnimate = (engine) => {
       break
   }
 }
+
+
 
