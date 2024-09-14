@@ -52,20 +52,6 @@ const stopingGameReadyApi = () => {
     window.ysdk = ysdk;
     if(ysdk.features.GameplayAPI){
       ysdk.features.GameplayAPI.stop();
-      // Вызов метода для работы с таблицей лидеров
-      //   ysdk.getLeaderboards()
-      //       .then(lb => {
-      //         return lb.setLeaderboardScore('leaderBoards', maxScore); // Установка очков
-      //       })
-      //       .then(() => {
-      //         console.log('Score successfully submitted');
-      //       })
-      //       .catch(err => {
-      //         console.error('Error submitting score:', err);
-      //       });
-      // }).catch(err => {
-      //   console.error('Error initializing Yandex SDK:', err);
-      // });
     }else {
       console.log('Невозможно остановить GameplayAPI')
     }

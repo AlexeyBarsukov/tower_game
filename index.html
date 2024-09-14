@@ -45,7 +45,7 @@
         100%{transform:rotate(-5deg);transform-origin:top center}}
     .modal .mask{background-color:#000;opacity:.6;position:fixed;height:100%;width:100%;top:0;left:0}
     .modal .modal-content{position:fixed;height:100%;width:90%;margin-top:.3rem;top:0}
-    .modal .main{width:85%;margin:0 auto}.modal .container{position:relative}.modal .bg{width:100%;position:absolute;top:0;left:0}.modal .modal-main{width:100%;position:absolute;top:0;left:0;margin-top:-.4rem}.modal .over-img{width:80%;margin:.8rem auto 0}.modal .over-score{margin-top:-.2rem;font-size:.5rem;color:#ff735c;text-shadow:-2px -2px 0 #fff,2px -2px 0 #fff,-2px 2px 0 #fff,2px 2px 0 #fff}.modal .tip{font-size:.16rem;color:#9b724e}.modal .over-button-b{width:70%;margin:.1rem auto 0; cursor: pointer}.wxShare{background:#000;position:absolute;top:0;left:0;width:100%;height:100%;z-index:11;opacity:.9}.wxShare img{width:50%;float:right;margin:10px 10px 0 0}@font-face{font-family:wenxue;src:url(assets/wenxue.eot);src:url(assets/wenxue.eot),url(assets/wenxue.woff),url(assets/wenxue.ttf),url(assets/wenxue.svg)}.font-wenxue{font-family:wenxue}</style></head>
+    .modal .main{width:85%;margin:0 auto}.modal .container{position:relative}.modal .bg{width:100%;position:absolute;top:0;left:0}.modal .modal-main{width:100%;position:absolute;top:0;left:0;margin-top:-.4rem}.modal .over-img{width:80%;margin:.8rem auto 0}.modal .over-score{margin-top:-.2rem;font-size:0.3rem;color:#ff735c;text-shadow:-2px -2px 0 #fff,2px -2px 0 #fff,-2px 2px 0 #fff,2px 2px 0 #fff}.modal .tip{font-size:.16rem;color:#9b724e}.modal .over-button-b{width:70%;margin:.1rem auto 0; cursor: pointer}.wxShare{background:#000;position:absolute;top:0;left:0;width:100%;height:100%;z-index:11;opacity:.9}.wxShare img{width:50%;float:right;margin:10px 10px 0 0}@font-face{font-family:wenxue;src:url(assets/wenxue.eot);src:url(assets/wenxue.eot),url(assets/wenxue.woff),url(assets/wenxue.ttf),url(assets/wenxue.svg)}.font-wenxue{font-family:wenxue}</style></head>
 <body>
 <canvas id="canvas" class="hide"></canvas>
 <div class="content">
@@ -110,6 +110,8 @@
   $('.content').css({ "height": gameHeight + "px", "width": gameWidth + "px" })
   $('.js-modal-content').css({ "width": gameWidth + "px" })
 
+  let maxScore = parseInt(localStorage.getItem('maxScore')) || 0;
+
   // loading animation
   function hideLoading() {
     if (domReady && canvasReady) {
@@ -164,6 +166,9 @@
     },
     setGameFailed: function (f) {
       $('#score').text(score)
+        if(score > maxScore){
+            localStorage.setItem('maxScore', score);
+        }
       if (f >= 3) overShowOver()
     }
   }
@@ -202,8 +207,28 @@
     }, 950)
   }
 
-    const stopingGameReadyApi = () => {
+  // const dataAboutLeaders = () => {
+  //     if(typeof YaGames === 'undefined'){
+  //         return;
+  //     }
+  //
+  //     YaGames.init().then(ysdk => {
+  //         console.log('Вызываю функция для остановки GameApi')
+  //         window.ysdk = ysdk;
+  //         let maxScore = localStorage.getItem('maxScore') || 0;
+  //
+  //         ysdk.getLeaderboards().then(lb => {
+  //                 return lb.setLeaderboardScore('scoreBest', maxScore);
+  //             }).then(() => {
+  //                 console.log('Score successfully submitted');
+  //             }).catch(err => {
+  //                 console.error('Error submitting score:', err);
+  //             });
+  //     })
+  // }
 
+    const stopingGameReadyApi = () => {
+      console.log('вызывался метод, который должен добавить счет')
         if(typeof YaGames === 'undefined'){
             return;
         }
@@ -212,27 +237,22 @@
             console.log('Вызываю функция для остановки GameApi')
             window.ysdk = ysdk;
             if(ysdk.features.GameplayAPI){
+
+                let maxScore = parseInt(localStorage.getItem('maxScore')) || 0;
+
+                ysdk.getLeaderboards().then(lb => {
+                    return lb.setLeaderboardScore('scoreBest', maxScore);
+                }).then(() => {
+                    console.log('Score successfully submitted');
+                }).catch(err => {
+                    console.error('Error submitting score:', err);
+                });
+
                 ysdk.features.GameplayAPI.stop();
-                // Вызов метода для работы с таблицей лидеров
-                //   ysdk.getLeaderboards()
-                //       .then(lb => {
-                //         return lb.setLeaderboardScore('leaderBoards', maxScore); // Установка очков
-                //       })
-                //       .then(() => {
-                //         console.log('Score successfully submitted');
-                //       })
-                //       .catch(err => {
-                //         console.error('Error submitting score:', err);
-                //       });
-                // }).catch(err => {
-                //   console.error('Error initializing Yandex SDK:', err);
-                // });
-            }else {
+                } else {
                 console.log('Невозможно остановить GameplayAPI')
             }
         })
-
-
     };
     const startGameReadyApi = () => {
 
@@ -270,13 +290,18 @@
   })
 
   $('.js-reload').on('click', function () {
-      console.log("СТОП ИГРА (ПЕРЕЗАГРУЗКА)")
-      stopingGameReadyApi()
-      window.location.reload();
+      document.getElementById('over-zero').style.display = 'none';
+      document.getElementById('score').innerText = 'Ожидайте...'
+      stopingGameReadyApi();
+      setTimeout(() => {
+         window.location.reload();
+      }, 200)
+
   })
 
   $('.js-invite').on('click', function () {
       document.getElementById('over-zero').style.display = 'none';
+      document.getElementById('score').innerText = 'Ожидайте...'
       startGameReadyApi();
     })
 
@@ -289,7 +314,6 @@
 
 
 </script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-YCWZ8ZDCH2"></script>
 <script>
     function gtag(){
         dataLayer.push(arguments)
